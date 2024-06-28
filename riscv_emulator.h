@@ -35,11 +35,11 @@
 #include "core/variant/variant.h"
 #include "thirdparty/libriscv/lib/libriscv/machine.hpp"
 
-#include <libriscv/machine.hpp>
 #include <libriscv/cpu.hpp>
+#include <libriscv/machine.hpp>
 
-using gaddr_t		= riscv::address_type< riscv::RISCV64>;
-using machine_t = riscv::Machine< riscv::RISCV64>;
+using gaddr_t = riscv::address_type<riscv::RISCV64>;
+using machine_t = riscv::Machine<riscv::RISCV64>;
 
 class RiscvEmulator : public RefCounted {
 	GDCLASS(RiscvEmulator, RefCounted);
@@ -55,10 +55,10 @@ public:
 	RiscvEmulator();
 	~RiscvEmulator();
 
-	auto& machine() { return *m_machine; }
-	const auto& machine() const { return *m_machine; }
+	auto &machine() { return *m_machine; }
+	const auto &machine() const { return *m_machine; }
 
-	const String& name();
+	const String &name();
 
 	// Functions.
 	void load(const PackedByteArray buffer, const PackedStringArray arguments);
@@ -73,7 +73,7 @@ private:
 	void handle_exception(gaddr_t);
 	void handle_timeout(gaddr_t);
 
-	machine_t* m_machine = nullptr;
+	machine_t *m_machine = nullptr;
 	std::vector<uint8_t> m_binary;
 
 	bool m_last_newline = false;
