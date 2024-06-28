@@ -100,7 +100,7 @@ endif()
 
 if (MINGW_TOOLCHAIN OR MINGW OR WIN32)
 	list(APPEND SOURCES
-		libriscv/win32/system_calls.cpp
+		libriscv/windows/system_calls.cpp
 	)
 elseif(UNIX)
 	list(APPEND SOURCES
