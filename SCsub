@@ -1,19 +1,11 @@
 Import('env')
 
-env.Append(CPPPATH=["#modules/riscv", "#modules/riscv/thirdparty/libriscv/lib/libriscv", "thirdparty/libriscv/lib", "thirdparty/libriscv/lib/libriscv/linux", "thirdparty/libriscv/lib/libriscv/posix", "thirdparty/libriscv/lib/libriscv/util"])
-env.Append(CPPDEFINES=["_DARWIN_C_SOURCE"])
-
 env_thirdparty = env.Clone()
 
-env_thirdparty.Append(CXXFLAGS=["-std=c++20"])
+env_thirdparty.Append(CPPPATH=["#modules/riscv", "thirdparty/libriscv/lib"])
+env_thirdparty.Append(CPPDEFINES=["_DARWIN_C_SOURCE"])
 
-if env["disable_exceptions"]:
-    # If exceptions were disabled, we have to undo this when compiling the thirdparty code.
-    if env.msvc:
-        env_thirdparty["CPPDEFINES"] = [x for x in env_thirdparty["CPPDEFINES"] if "_HAS_EXCEPTIONS" not in x]
-        env_thirdparty.Append(CCFLAGS=["/EHsc"])
-    else:
-        env_thirdparty["CCFLAGS"] = [x for x in env_thirdparty["CCFLAGS"] if "-fno-exceptions" not in x]
+env_thirdparty.Append(CXXFLAGS=["-std=c++20"])
 
 src_list = [
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/rv64i.cpp",

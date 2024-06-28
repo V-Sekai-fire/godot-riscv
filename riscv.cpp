@@ -30,7 +30,9 @@
 
 #include "riscv.h"
 
-#include "modules/riscv/thirdparty/libriscv/lib/libriscv/machine.hpp"
+#include <libriscv/machine.hpp>
+
+using namespace riscv;
 
 void Summator::add(int p_value) {
 	count += p_value;
@@ -49,8 +51,6 @@ void Summator::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("reset"), &Summator::reset);
 	ClassDB::bind_method(D_METHOD("get_total"), &Summator::get_total);
 }
-
-using namespace riscv;
 
 Summator::Summator() {
 	count = 0;
