@@ -33,10 +33,10 @@
 
 #include "core/object/ref_counted.h"
 #include "core/variant/variant.h"
-#include "thirdparty/libriscv/lib/libriscv/machine.hpp"
 
 #include <libriscv/cpu.hpp>
 #include <libriscv/machine.hpp>
+#include <libriscv/threaded_bytecodes.hpp>
 
 using gaddr_t = riscv::address_type<riscv::RISCV64>;
 using machine_t = riscv::Machine<riscv::RISCV64>;
