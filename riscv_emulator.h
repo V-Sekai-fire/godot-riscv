@@ -33,8 +33,8 @@
 
 #include "core/object/ref_counted.h"
 
-class Summator : public RefCounted {
-	GDCLASS(Summator, RefCounted);
+class RiscvEmulator : public RefCounted {
+	GDCLASS(RiscvEmulator, RefCounted);
 
 	int count;
 
@@ -46,7 +46,7 @@ public:
 	void reset();
 	int get_total() const;
 
-	Summator();
+	RiscvEmulator();
 };
 
 #endif // RISCV_H

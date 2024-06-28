@@ -28,31 +28,31 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#include "riscv.h"
+#include "riscv_emulator.h"
 
 #include <libriscv/machine.hpp>
 
 using namespace riscv;
 
-void Summator::add(int p_value) {
+void RiscvEmulator::add(int p_value) {
 	count += p_value;
 }
 
-void Summator::reset() {
+void RiscvEmulator::reset() {
 	count = 0;
 }
 
-int Summator::get_total() const {
+int RiscvEmulator::get_total() const {
 	return count;
 }
 
-void Summator::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("add", "value"), &Summator::add);
-	ClassDB::bind_method(D_METHOD("reset"), &Summator::reset);
-	ClassDB::bind_method(D_METHOD("get_total"), &Summator::get_total);
+void RiscvEmulator::_bind_methods() {
+	ClassDB::bind_method(D_METHOD("add", "value"), &RiscvEmulator::add);
+	ClassDB::bind_method(D_METHOD("reset"), &RiscvEmulator::reset);
+	ClassDB::bind_method(D_METHOD("get_total"), &RiscvEmulator::get_total);
 }
 
-Summator::Summator() {
+RiscvEmulator::RiscvEmulator() {
 	count = 0;
 
 	const std::vector<uint8_t> binary;
