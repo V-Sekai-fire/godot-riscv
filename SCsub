@@ -2,7 +2,7 @@ Import('env')
 
 env_thirdparty = env.Clone()
 
-env_thirdparty.Append(CXXFLAGS=["-std=c++2a"])
+env_thirdparty.Append(CXXFLAGS=["-std=c++20"])
 
 if env["disable_exceptions"]:
     # If exceptions were disabled, we have to undo this when compiling the thirdparty code.
@@ -46,10 +46,3 @@ env_thirdparty.add_source_files(env.modules_sources, src_list)
 # Specify the include directories
 env_thirdparty.Append(CPPPATH=["#modules/riscv", "thirdparty/libriscv/lib", "thirdparty/libriscv/lib/libriscv/linux", "thirdparty/libriscv/lib/libriscv/posix", "thirdparty/libriscv/lib/libriscv/util"])
 env_thirdparty.Append(CPPDEFINES=["_DARWIN_C_SOURCE"])
-
-# Specify the library paths and link flags if needed
-# env.Append(LIBPATH=["path/to/libs"])
-# env.Append(LINKFLAGS=["-lmylib"])
-
-# If there are any specific C++ flags you want to add, you can use the following line
-# env.Append(CXXFLAGS=["-std=c++20"])
