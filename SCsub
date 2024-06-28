@@ -1,5 +1,8 @@
 Import('env')
 
+env.Append(CPPPATH=["#modules/riscv", "#modules/riscv/thirdparty/libriscv/lib/libriscv", "thirdparty/libriscv/lib", "thirdparty/libriscv/lib/libriscv/linux", "thirdparty/libriscv/lib/libriscv/posix", "thirdparty/libriscv/lib/libriscv/util"])
+env.Append(CPPDEFINES=["_DARWIN_C_SOURCE"])
+
 env_thirdparty = env.Clone()
 
 env_thirdparty.Append(CXXFLAGS=["-std=c++20"])
@@ -12,8 +15,8 @@ if env["disable_exceptions"]:
     else:
         env_thirdparty["CCFLAGS"] = [x for x in env_thirdparty["CCFLAGS"] if "-fno-exceptions" not in x]
 
-# Add all .cpp files in the current directory to the environment
 src_list = [
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/rv64i.cpp",
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/cpu.cpp",
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/debug.cpp",
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/decode_bytecodes.cpp",
@@ -26,7 +29,6 @@ src_list = [
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/memory_rw.cpp",
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/multiprocessing.cpp",
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/native_libc.cpp",
-    "#modules/riscv/thirdparty/libriscv/lib/libriscv/rv64i.cpp",
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/native_threads.cpp",
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/posix/minimal.cpp",
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/posix/signals.cpp",
@@ -34,6 +36,7 @@ src_list = [
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/posix/socket_calls.cpp",
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/serialize.cpp",
     "#modules/riscv/thirdparty/libriscv/lib/libriscv/util/crc32c.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/linux/system_calls.cpp",
     "#modules/riscv/riscv.cpp",
     "#modules/riscv/register_types.cpp",
 ]
@@ -41,8 +44,4 @@ src_list = [
 if env_thirdparty['platform'] == 'osx':
     pass
 
-env_thirdparty.add_source_files(env.modules_sources, src_list)
-
-# Specify the include directories
-env_thirdparty.Append(CPPPATH=["#modules/riscv", "thirdparty/libriscv/lib", "thirdparty/libriscv/lib/libriscv/linux", "thirdparty/libriscv/lib/libriscv/posix", "thirdparty/libriscv/lib/libriscv/util"])
-env_thirdparty.Append(CPPDEFINES=["_DARWIN_C_SOURCE"])
+env_thirdparty.add_source_files(env_thirdparty.modules_sources, src_list)

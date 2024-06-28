@@ -549,11 +549,35 @@ inline void copy_stat_buffer(struct stat& st, struct riscv_stat& rst)
 	rst.st_blksize = st.st_blksize;
 	rst.st_blocks = st.st_blocks;
 	rst.rv_atime = st.st_atime;
+	#ifdef __APPLE__
+	rst.rv_atime_nsec = st.st_atimespec.tv_nsec;
+	#else
+	#ifdef __USE_MISC
 	rst.rv_atime_nsec = st.st_atim.tv_nsec;
+	#else
+	rst.rv_atime_nsec = 0; // or another appropriate value
+	#endif
+	#endif
 	rst.rv_mtime = st.st_mtime;
+	#ifdef __APPLE__
+	rst.rv_mtime_nsec = st.st_mtimespec.tv_nsec;
+	#else
+	#ifdef __USE_MISC
 	rst.rv_mtime_nsec = st.st_mtim.tv_nsec;
+	#else
+	rst.rv_mtime_nsec = 0; // or another appropriate value
+	#endif
+	#endif
 	rst.rv_ctime = st.st_ctime;
+	#ifdef __APPLE__
+	rst.rv_ctime_nsec = st.st_ctimespec.tv_nsec;
+	#else
+	#ifdef __USE_MISC
 	rst.rv_ctime_nsec = st.st_ctim.tv_nsec;
+	#else
+	rst.rv_ctime_nsec = 0; // or another appropriate value
+	#endif
+	#endif
 }
 
 template <int W>
@@ -824,6 +848,10 @@ static void syscall_brk(Machine<W>& machine)
 	machine.set_result(new_end);
 }
 
+#if defined(__APPLE__)
+    #include <Security/Security.h>
+#endif
+
 template <int W>
 static void syscall_getrandom(Machine<W>& machine)
 {
@@ -839,6 +867,9 @@ static void syscall_getrandom(Machine<W>& machine)
 #if defined(__OpenBSD__)
 	const ssize_t result = 0; // always success
 	arc4random_buf(buffer, need);
+#elif defined(__APPLE__)
+    const int sec_result = SecRandomCopyBytes(kSecRandomDefault, need, (uint8_t *)buffer);
+    const ssize_t result = (sec_result == errSecSuccess) ? need : -1;
 #else
 	const ssize_t result = getrandom(buffer, need, 0);
 #endif

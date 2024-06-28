@@ -30,6 +30,8 @@
 
 #include "riscv.h"
 
+#include "modules/riscv/thirdparty/libriscv/lib/libriscv/machine.hpp"
+
 void Summator::add(int p_value) {
 	count += p_value;
 }
@@ -48,6 +50,30 @@ void Summator::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_total"), &Summator::get_total);
 }
 
+using namespace riscv;
+
 Summator::Summator() {
 	count = 0;
+
+	const std::vector<uint8_t> binary;
+
+	Machine<RISCV64> machine{ binary };
+
+	machine.setup_linux(
+			{ "myprogram", "1st argument!", "2nd argument!" },
+			{ "LC_TYPE=C", "LC_ALL=C", "USER=godot" });
+	machine.setup_linux_syscalls();
+
+	Machine<RISCV64>::install_syscall_handler(94, // exit_group
+			[](Machine<RISCV64> &machine) {
+				const auto code = machine.sysarg<int>(0);
+				printf(">>> Program exited, exit code = %d\n", code);
+				machine.stop();
+			});
+
+	try {
+		machine.simulate(5'000'000'000ull);
+	} catch (const std::exception &e) {
+		fprintf(stderr, ">>> Runtime exception: %s\n", e.what());
+	}
 }

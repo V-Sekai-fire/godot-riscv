@@ -1,3 +1,13 @@
+#if defined(__APPLE__)
+    #include <time.h>
+    struct timespec {
+        time_t   tv_sec;  /* seconds */
+        long     tv_nsec; /* nanoseconds */
+    };
+#else
+    #include <sys/time.h>
+#endif
+
 #include <poll.h>
 
 // int ppoll(struct pollfd *fds, nfds_t nfds,
