@@ -31,7 +31,7 @@
 #include "register_types.h"
 
 #include "core/object/class_db.h"
-#include "summator.h"
+#include "riscv.h"
 
 void initialize_riscv_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
