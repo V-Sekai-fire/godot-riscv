@@ -2,14 +2,6 @@ Import("env")
 
 env_riscv = env.Clone()
 
-if env["disable_exceptions"]:
-    # If exceptions were disabled, we have to undo this when compiling the thirdparty code.
-    if env.msvc:
-        env_riscv["CPPDEFINES"] = [x for x in env_riscv["CPPDEFINES"] if "_HAS_EXCEPTIONS" not in x]
-        env_riscv.Append(CCFLAGS=["/EHsc"])
-    else:
-        env_riscv["CCFLAGS"] = [x for x in env_riscv["CCFLAGS"] if "-fno-exceptions" not in x]
-
 env_riscv.Append(CPPPATH=["#modules/riscv", "thirdparty/libriscv/lib"])
 
 env_riscv.Append(CPPDEFINES=[
