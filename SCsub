@@ -33,7 +33,4 @@ src_list = [
     "#modules/riscv/register_types.cpp",
 ]
 
-if env_thirdparty['platform'] == 'osx':
-    pass
-
 env_thirdparty.add_source_files(env_thirdparty.modules_sources, src_list)
