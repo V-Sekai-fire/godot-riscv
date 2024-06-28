@@ -32,21 +32,53 @@
 #define RISCV_H
 
 #include "core/object/ref_counted.h"
+#include "core/variant/variant.h"
+#include "thirdparty/libriscv/lib/libriscv/machine.hpp"
+
+#include <libriscv/machine.hpp>
+#include <libriscv/cpu.hpp>
+
+using gaddr_t		= riscv::address_type< riscv::RISCV64>;
+using machine_t = riscv::Machine< riscv::RISCV64>;
 
 class RiscvEmulator : public RefCounted {
 	GDCLASS(RiscvEmulator, RefCounted);
 
-	int count;
-
 protected:
 	static void _bind_methods();
 
+	virtual String to_string() override;
+
 public:
-	void add(int p_value);
-	void reset();
-	int get_total() const;
+	static constexpr uint64_t MAX_INSTRUCTIONS = 16'000'000'000ULL;
 
 	RiscvEmulator();
+	~RiscvEmulator();
+
+	auto& machine() { return *m_machine; }
+	const auto& machine() const { return *m_machine; }
+
+	const String& name();
+
+	// Functions.
+	void load(const PackedByteArray buffer, const PackedStringArray arguments);
+	void exec();
+	void fork_exec();
+	GDExtensionInt call(String function);
+
+	void print(std::string_view text);
+	gaddr_t address_of(std::string_view name) const;
+
+private:
+	void handle_exception(gaddr_t);
+	void handle_timeout(gaddr_t);
+
+	machine_t* m_machine = nullptr;
+	std::vector<uint8_t> m_binary;
+
+	bool m_last_newline = false;
+	unsigned m_budget_overruns = 0;
+	String m_name;
 };
 
 #endif // RISCV_H

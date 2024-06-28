@@ -7,7 +7,9 @@ env_riscv.Append(CPPDEFINES=["_DARWIN_C_SOURCE"])
 
 env_riscv.Append(CXXFLAGS=["-std=c++20"])
 
-src_list = [
+thirdparty_obj = []
+
+thirdparty_sources = [
     "thirdparty/libriscv/lib/libriscv/rv64i.cpp",
     "thirdparty/libriscv/lib/libriscv/cpu.cpp",
     "thirdparty/libriscv/lib/libriscv/debug.cpp",
@@ -29,8 +31,14 @@ src_list = [
     "thirdparty/libriscv/lib/libriscv/serialize.cpp",
     "thirdparty/libriscv/lib/libriscv/util/crc32c.cpp",
     "thirdparty/libriscv/lib/libriscv/linux/system_calls.cpp",
-    "riscv_emulator.cpp",
-    "register_types.cpp",
 ]
+env_riscv.add_source_files(thirdparty_obj, thirdparty_sources)
 
-env_riscv.add_source_files(env_riscv.modules_sources, src_list)
+env.modules_sources += thirdparty_obj
+
+module_obj = []
+
+env_riscv.add_source_files(module_obj, "*.cpp")
+env.modules_sources += module_obj
+
+env.Depends(module_obj, thirdparty_obj)
