@@ -31,7 +31,7 @@
 #ifndef RISCV_EMULATOR_H
 #define RISCV_EMULATOR_H
 
-#include "core/object/ref_counted.h"
+#include "core/io/resource.h"
 #include "core/variant/variant.h"
 
 #include <libriscv/cpu.hpp>
@@ -41,8 +41,8 @@
 using gaddr_t = riscv::address_type<riscv::RISCV64>;
 using machine_t = riscv::Machine<riscv::RISCV64>;
 
-class RiscvEmulator : public RefCounted {
-	GDCLASS(RiscvEmulator, RefCounted);
+class RiscvEmulator : public Resource {
+	GDCLASS(RiscvEmulator, Resource);
 
 protected:
 	static void _bind_methods();
