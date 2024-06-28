@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  summator.h                                                            */
+/*  riscv.h                                                               */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef SUMMATOR_H
-#define SUMMATOR_H
+#ifndef RISCV_H
+#define RISCV_H
 
 #include "core/object/ref_counted.h"
 
@@ -49,4 +49,4 @@ public:
 	Summator();
 };
 
-#endif // SUMMATOR_H
+#endif // RISCV_H
