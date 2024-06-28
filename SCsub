@@ -2,6 +2,8 @@ Import('env')
 
 env_thirdparty = env.Clone()
 
+env_thirdparty.Append(CXXFLAGS=["-std=c++2a"])
+
 if env["disable_exceptions"]:
     # If exceptions were disabled, we have to undo this when compiling the thirdparty code.
     if env.msvc:
@@ -12,37 +14,38 @@ if env["disable_exceptions"]:
 
 # Add all .cpp files in the current directory to the environment
 src_list = [
-    "thirdparty/libriscv/lib/libriscv/cpu.cpp",
-    "thirdparty/libriscv/lib/libriscv/debug.cpp",
-    "thirdparty/libriscv/lib/libriscv/decode_bytecodes.cpp",
-    "thirdparty/libriscv/lib/libriscv/decoder_cache.cpp",
-    "thirdparty/libriscv/lib/libriscv/machine.cpp",
-    "thirdparty/libriscv/lib/libriscv/machine_defaults.cpp",
-    "thirdparty/libriscv/lib/libriscv/memory.cpp",
-    "thirdparty/libriscv/lib/libriscv/memory_elf.cpp",
-    "thirdparty/libriscv/lib/libriscv/memory_mmap.cpp",
-    "thirdparty/libriscv/lib/libriscv/memory_rw.cpp",
-    "thirdparty/libriscv/lib/libriscv/multiprocessing.cpp",
-    "thirdparty/libriscv/lib/libriscv/native_libc.cpp",
-    "thirdparty/libriscv/lib/libriscv/rv64i.cpp",
-    "thirdparty/libriscv/lib/libriscv/native_threads.cpp",
-    "thirdparty/libriscv/lib/libriscv/posix/minimal.cpp",
-    "thirdparty/libriscv/lib/libriscv/posix/signals.cpp",
-    "thirdparty/libriscv/lib/libriscv/posix/threads.cpp",
-    "thirdparty/libriscv/lib/libriscv/posix/socket_calls.cpp",
-    "thirdparty/libriscv/lib/libriscv/serialize.cpp",
-    "thirdparty/libriscv/lib/libriscv/util/crc32c.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/cpu.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/debug.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/decode_bytecodes.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/decoder_cache.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/machine.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/machine_defaults.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/memory.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/memory_elf.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/memory_mmap.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/memory_rw.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/multiprocessing.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/native_libc.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/rv64i.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/native_threads.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/posix/minimal.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/posix/signals.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/posix/threads.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/posix/socket_calls.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/serialize.cpp",
+    "#modules/riscv/thirdparty/libriscv/lib/libriscv/util/crc32c.cpp",
+    "#modules/riscv/riscv.cpp",
+    "#modules/riscv/register_types.cpp",
 ]
 
 if env_thirdparty['platform'] == 'osx':
     pass
 
-env_thirdparty.add_source_files(env_thirdparty.modules_sources, src_list)
+env_thirdparty.add_source_files(env.modules_sources, src_list)
 
 # Specify the include directories
-env_thirdparty.Append(CPPPATH=[".", "#modules/riscv", "libriscv", "thirdparty/libriscv/lib/libriscv/linux", "thirdparty/libriscv/lib/libriscv/posix", "thirdparty/libriscv/lib/libriscv/util"])
-
-env.modules_sources += src_list
+env_thirdparty.Append(CPPPATH=["#modules/riscv", "thirdparty/libriscv/lib", "thirdparty/libriscv/lib/libriscv/linux", "thirdparty/libriscv/lib/libriscv/posix", "thirdparty/libriscv/lib/libriscv/util"])
+env_thirdparty.Append(CPPDEFINES=["_DARWIN_C_SOURCE"])
 
 # Specify the library paths and link flags if needed
 # env.Append(LIBPATH=["path/to/libs"])
