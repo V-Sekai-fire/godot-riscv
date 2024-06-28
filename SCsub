@@ -31,7 +31,36 @@ thirdparty_sources = [
     "thirdparty/libriscv/lib/libriscv/serialize.cpp",
     "thirdparty/libriscv/lib/libriscv/util/crc32c.cpp",
     "thirdparty/libriscv/lib/libriscv/linux/system_calls.cpp",
+    "thirdparty/libriscv/lib/libriscv/bytecode_dispatch.cpp",
+    "thirdparty/libriscv/lib/libriscv/bytecode_impl.cpp",
+    "thirdparty/libriscv/lib/libriscv/cpu_dispatch.cpp",
+    # "thirdparty/libriscv/lib/libriscv/rv128i.cpp",
+    # "thirdparty/libriscv/lib/libriscv/rva128_instr.cpp",
+    "thirdparty/libriscv/lib/libriscv/rva_instr.cpp",
+    "thirdparty/libriscv/lib/libriscv/rvc_instr.cpp",
+    "thirdparty/libriscv/lib/libriscv/rvf_instr.cpp",
+    "thirdparty/libriscv/lib/libriscv/rvi_fuse.cpp",
+    "thirdparty/libriscv/lib/libriscv/rvi_instr.cpp",
+    "thirdparty/libriscv/lib/libriscv/rvv_instr.cpp",
+    "thirdparty/libriscv/lib/libriscv/tailcall_dispatch.cpp",
+    "thirdparty/libriscv/lib/libriscv/threaded_dispatch.cpp",
+    "thirdparty/libriscv/lib/libriscv/threaded_rewriter.cpp",
+    "thirdparty/libriscv/lib/libriscv/tr_api.cpp",
+    "thirdparty/libriscv/lib/libriscv/tr_compiler.cpp",
+    "thirdparty/libriscv/lib/libriscv/tr_emit.cpp",
+    "thirdparty/libriscv/lib/libriscv/tr_emit_rvc.cpp",
+    "thirdparty/libriscv/lib/libriscv/tr_tcc.cpp",
+    "thirdparty/libriscv/lib/libriscv/tr_translate.cpp",
+    "thirdparty/libriscv/lib/libriscv/linux/syscalls_epoll.cpp",
+    "thirdparty/libriscv/lib/libriscv/linux/syscalls_mman.cpp",
+    "thirdparty/libriscv/lib/libriscv/linux/syscalls_poll.cpp",
+    "thirdparty/libriscv/lib/libriscv/linux/syscalls_select.cpp",
+    "thirdparty/libriscv/lib/libriscv/util/crc32c.cpp",
+    # "thirdparty/libriscv/lib/libriscv/windows/dlfcn.cpp",
+    # "thirdparty/libriscv/lib/libriscv/windows/system_calls.cpp",
+    # "thirdparty/libriscv/lib/libriscv/windows/tr_msvc.cpp"
 ]
+
 env_riscv.add_source_files(thirdparty_obj, thirdparty_sources)
 
 env.modules_sources += thirdparty_obj
