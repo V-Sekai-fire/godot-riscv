@@ -29,6 +29,7 @@
 /**************************************************************************/
 
 #include "riscv_emulator.h"
+#include <cstdint>
 
 using namespace riscv;
 
@@ -40,6 +41,13 @@ void RiscvEmulator::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("load"), &RiscvEmulator::load);
 	ClassDB::bind_method(D_METHOD("exec"), &RiscvEmulator::exec);
 	ClassDB::bind_method(D_METHOD("fork_exec"), &RiscvEmulator::fork_exec);
+
+	ClassDB::bind_method(D_METHOD("get_buffer"), &RiscvEmulator::get_buffer);
+	ClassDB::bind_method(D_METHOD("set_buffer", "new_buffer"), &RiscvEmulator::set_buffer);
+	ClassDB::bind_method(D_METHOD("get_arguments"), &RiscvEmulator::get_arguments);
+	ClassDB::bind_method(D_METHOD("set_arguments", "new_arguments"), &RiscvEmulator::set_arguments);
+	ADD_PROPERTY(PropertyInfo(Variant::PACKED_BYTE_ARRAY, "buffer"), "set_buffer", "get_buffer");
+	ADD_PROPERTY(PropertyInfo(Variant::PACKED_STRING_ARRAY, "arguments"), "set_arguments", "get_arguments");
 }
 
 RiscvEmulator::RiscvEmulator() {
@@ -47,15 +55,12 @@ RiscvEmulator::RiscvEmulator() {
 	// class is well-formed at all times.
 	this->m_machine = new machine_t{};
 	this->m_name = "(name)";
-	print_line("Constructor.");
 }
 
 RiscvEmulator::~RiscvEmulator() {
-	print_line("Destructor.");
 	delete this->m_machine;
 }
 
-// Methods.
 const String &RiscvEmulator::name() {
 	return this->m_name;
 }
@@ -84,7 +89,7 @@ void RiscvEmulator::exec() {
 void RiscvEmulator::fork_exec() {
 }
 
-GDExtensionInt RiscvEmulator::call(String function) {
+int64_t RiscvEmulator::call(String function) {
 	const auto ascii = function.ascii();
 	const std::string_view sview{ ascii.get_data(), (size_t)ascii.length() };
 	gaddr_t address = 0x0;
@@ -94,12 +99,12 @@ GDExtensionInt RiscvEmulator::call(String function) {
 		address = machine().address_of(sview);
 		return machine().vmcall<MAX_INSTRUCTIONS>(address);
 	} catch (const std::exception &e) {
-		this->handle_exception(address);
+		_handle_exception(address);
 	}
 	return -1;
 }
 
-void RiscvEmulator::handle_exception(gaddr_t address) {
+void RiscvEmulator::_handle_exception(gaddr_t address) {
 	auto callsite = machine().memory.lookup(address);
 	print_line(
 			"[", name(), "] Exception when calling:\n  ", callsite.name.c_str(), " (0x",
@@ -109,7 +114,7 @@ void RiscvEmulator::handle_exception(gaddr_t address) {
 	try {
 		throw; // re-throw
 	} catch (const riscv::MachineTimeoutException &e) {
-		this->handle_timeout(address);
+		_handle_timeout(address);
 		return; // NOTE: might wanna stay
 	} catch (const riscv::MachineException &e) {
 		const String instr(machine().cpu.current_instruction_to_string().c_str());
@@ -131,7 +136,7 @@ void RiscvEmulator::handle_exception(gaddr_t address) {
 			"\n");
 }
 
-void RiscvEmulator::handle_timeout(gaddr_t address) {
+void RiscvEmulator::_handle_timeout(gaddr_t address) {
 	this->m_budget_overruns++;
 	auto callsite = machine().memory.lookup(address);
 	print_line(
@@ -139,6 +144,6 @@ void RiscvEmulator::handle_timeout(gaddr_t address) {
 			"' (Timeouts: ", m_budget_overruns, "\n");
 }
 
-gaddr_t RiscvEmulator::address_of(std::string_view name) const {
+gaddr_t RiscvEmulator::_address_of(std::string_view name) const {
 	return machine().address_of(name);
 }

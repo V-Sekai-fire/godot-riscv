@@ -64,14 +64,17 @@ public:
 	void load(const PackedByteArray buffer, const PackedStringArray arguments);
 	void exec();
 	void fork_exec();
-	GDExtensionInt call(String function);
+	int64_t call(String function);
+	gaddr_t _address_of(std::string_view name) const;
 
-	void print(std::string_view text);
-	gaddr_t address_of(std::string_view name) const;
+    PackedByteArray get_buffer() const { return buffer; }
+    void set_buffer(const PackedByteArray& p_new_buffer) { buffer = p_new_buffer; }
 
+    PackedStringArray get_arguments() const { return arguments; }
+    void set_arguments(const PackedStringArray& p_new_arguments) { arguments = p_new_arguments; }
 private:
-	void handle_exception(gaddr_t);
-	void handle_timeout(gaddr_t);
+	void _handle_exception(gaddr_t);
+	void _handle_timeout(gaddr_t);
 
 	machine_t *m_machine = nullptr;
 	std::vector<uint8_t> m_binary;
@@ -79,6 +82,9 @@ private:
 	bool m_last_newline = false;
 	unsigned m_budget_overruns = 0;
 	String m_name;
+
+    PackedByteArray buffer;
+    PackedStringArray arguments;
 };
 
 #endif // RISCV_EMULATOR_H
