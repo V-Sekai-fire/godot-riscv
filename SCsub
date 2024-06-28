@@ -2,6 +2,14 @@ Import('env')
 
 env_riscv = env.Clone()
 
+if env["disable_exceptions"]:
+    # If exceptions were disabled, we have to undo this when compiling the thirdparty code.
+    if env.msvc:
+        env_riscv["CPPDEFINES"] = [x for x in env_riscv["CPPDEFINES"] if "_HAS_EXCEPTIONS" not in x]
+        env_riscv.Append(CCFLAGS=["/EHsc"])
+    else:
+        env_riscv["CCFLAGS"] = [x for x in env_riscv["CCFLAGS"] if "-fno-exceptions" not in x]
+
 env_riscv.Append(CPPPATH=["#modules/riscv", "thirdparty/libriscv/lib"])
 env_riscv.Append(CPPDEFINES=["_DARWIN_C_SOURCE"])
 
@@ -32,7 +40,7 @@ thirdparty_sources = [
     "thirdparty/libriscv/lib/libriscv/util/crc32c.cpp",
     "thirdparty/libriscv/lib/libriscv/linux/system_calls.cpp",
     "thirdparty/libriscv/lib/libriscv/bytecode_dispatch.cpp",
-    "thirdparty/libriscv/lib/libriscv/bytecode_impl.cpp",
+    # "thirdparty/libriscv/lib/libriscv/bytecode_impl.cpp",
     "thirdparty/libriscv/lib/libriscv/cpu_dispatch.cpp",
     # "thirdparty/libriscv/lib/libriscv/rv128i.cpp",
     # "thirdparty/libriscv/lib/libriscv/rva128_instr.cpp",
