@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  riscv.h                                                               */
+/*  riscv_emulator.h                                                      */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,8 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef RISCV_H
-#define RISCV_H
+#ifndef RISCV_EMULATOR_H
+#define RISCV_EMULATOR_H
 
 #include "core/object/ref_counted.h"
 #include "core/variant/variant.h"
@@ -81,4 +81,4 @@ private:
 	String m_name;
 };
 
-#endif // RISCV_H
+#endif // RISCV_EMULATOR_H
