@@ -25,7 +25,7 @@ env_riscv.Append(CPPDEFINES=[
     # "RISCV_LIBTCC",
 ])
 
-env_riscv.Append(CXXFLAGS=["-std=c++20", "-Wno-implicit-fallthrough"])
+env_riscv.Append(CXXFLAGS=["-std=c++20"])
 
 thirdparty_obj = []
 

@@ -242,12 +242,12 @@ continue_segment:
 #ifdef DISPATCH_MODE_SWITCH_BASED
 
 while (true) {
-	switch (decoder->get_bytecode()) {
-	#define INSTRUCTION(bc, lbl) case bc:
+    switch (decoder->get_bytecode()) {
+    #define INSTRUCTION(bc, lbl) case bc: [[fallthrough]];
 
 #else
-	goto *computed_opcode[decoder->get_bytecode()];
-	#define INSTRUCTION(bc, lbl) lbl:
+    goto *computed_opcode[decoder->get_bytecode()];
+    #define INSTRUCTION(bc, lbl) lbl:
 
 #endif
 
