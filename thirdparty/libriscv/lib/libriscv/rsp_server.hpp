@@ -124,7 +124,7 @@ private:
 #ifndef WIN32
 #include "linux/rsp_server.hpp"
 #else
-#include "win32/rsp_server.hpp"
+#include "windows/rsp_server.hpp"
 #endif
 
 namespace riscv {

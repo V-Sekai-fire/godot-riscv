@@ -23,6 +23,8 @@ struct Arguments {
 	bool sandbox = false;
 	bool ignore_text = false;
 	uint64_t fuel = UINT64_MAX;
+	std::string output_file;
+	std::string call_function;
 };
 
 #ifdef HAVE_GETOPT_LONG
@@ -41,9 +43,11 @@ static const struct option long_options[] = {
 	{"trace", no_argument, 0, 'T'},
 	{"no-translate", no_argument, 0, 'n'},
 	{"mingw", no_argument, 0, 'm'},
+	{"output", required_argument, 0, 'o'},
 	{"from-start", no_argument, 0, 'F'},
 	{"sandbox", no_argument, 0, 'S'},
 	{"ignore-text", no_argument, 0, 'I'},
+	{"call", required_argument, 0, 'c'},
 	{0, 0, 0, 0}
 };
 
@@ -56,23 +60,66 @@ static void print_help(const char* name)
 		"  -a, --accurate     Accurate instruction counting\n"
 		"  -d, --debug        Enable CLI debugger\n"
 		"  -1, --single-step  One instruction at a time, enabling exact exceptions\n"
-		"  -f, --fuel         Set max instructions until program halts\n"
+		"  -f, --fuel amt     Set max instructions until program halts\n"
 		"  -g, --gdb          Start GDB server on port 2159\n"
 		"  -s, --silent       Suppress program completion information\n"
 		"  -t, --timing       Enable timing information in binary translator\n"
 		"  -T, --trace        Enable tracing in binary translator\n"
 		"  -n, --no-translate Disable binary translation\n"
 		"  -m, --mingw        Cross-compile for Windows (MinGW)\n"
+		"  -o, --output file  Output embeddable binary translated code (C99)\n"
 		"  -F, --from-start   Start debugger from the beginning (_start)\n"
 		"  -S  --sandbox      Enable strict sandbox\n"
 		"  -I, --ignore-text  Ignore .text section, and use segments only\n"
+		"  -c, --call func    Call a function after loading the program\n"
+		"\n"
+	);
+	printf("libriscv is compiled with:\n"
+#ifdef RISCV_32I
+		"-  32-bit RISC-V support (RV32GB)\n"
+#endif
+#ifdef RISCV_64I
+		"-  64-bit RISC-V support (RV64GB)\n"
+#endif
+#ifdef RISCV_128I
+		"-  128-bit RISC-V support (RV128G)\n"
+#endif
+#ifdef RISCV_EXT_A
+		"-  A: Atomic extension is enabled\n"
+#endif
+#ifdef RISCV_EXT_C
+		"-  C: Compressed extension is enabled\n"
+#endif
+#ifdef RISCV_EXT_V
+		"-  V: Vector extension is enabled\n"
+#endif
+#if defined(RISCV_BINARY_TRANSLATION) && defined(RISCV_LIBTCC)
+		"-  Binary translation is enabled (libtcc)\n"
+#elif defined(RISCV_BINARY_TRANSLATION)
+		"-  Binary translation is enabled\n"
+#endif
+#ifdef RISCV_DEBUG
+		"-  Extra debugging features are enabled\n"
+#endif
+#ifdef RISCV_FLAT_RW_ARENA
+		"-  Flat sequential memory arena is enabled\n"
+#endif
+#ifdef RISCV_ENCOMPASSING_ARENA
+#define _STR(x) #x
+#define STR(x) _STR(x)
+		"-  Fixed N-bit address space is enabled (" STR(RISCV_ENCOMPASSING_ARENA_BITS) " bits)\n"
+#endif
+#ifdef RISCV_TIMED_VMCALLS
+		"-  Timed VM calls are enabled\n"
+#endif
+		"\n"
 	);
 }
 
 static int parse_arguments(int argc, const char** argv, Arguments& args)
 {
 	int c;
-	while ((c = getopt_long(argc, (char**)argv, "hvad1f:gstTnmFSI", long_options, nullptr)) != -1)
+	while ((c = getopt_long(argc, (char**)argv, "hvad1f:gstTnmo:FSIc:", long_options, nullptr)) != -1)
 	{
 		switch (c)
 		{
@@ -88,9 +135,11 @@ static int parse_arguments(int argc, const char** argv, Arguments& args)
 			case 'T': args.trace = true; break;
 			case 'n': args.no_translate = true; break;
 			case 'm': args.mingw = true; break;
+			case 'o': break;
 			case 'F': args.from_start = true; break;
 			case 'S': args.sandbox = true; break;
 			case 'I': args.ignore_text = true; break;
+			case 'c': break;
 			default:
 				fprintf(stderr, "Unknown option: %c\n", c);
 				return -1;
@@ -107,7 +156,17 @@ static int parse_arguments(int argc, const char** argv, Arguments& args)
 				args.fuel = UINT64_MAX;
 			}
 			if (args.verbose) {
-				printf("Fuel set to %" PRIu64 "\n", args.fuel);
+				printf("* Fuel set to %" PRIu64 "\n", args.fuel);
+			}
+		} else if (c == 'o') {
+			args.output_file = optarg;
+			if (args.verbose) {
+				printf("* Output file prefix set to %s\n", args.output_file.c_str());
+			}
+		} else if (c == 'c') {
+			args.call_function = optarg;
+			if (args.verbose) {
+				printf("* Function to VMCall: %s\n", args.call_function.c_str());
 			}
 		}
 	}
@@ -132,6 +191,19 @@ static void run_program(
 	const bool is_dynamic,
 	const std::vector<std::string>& args)
 {
+	if (cli_args.mingw && (!riscv::binary_translation_enabled || riscv::libtcc_enabled)) {
+		fprintf(stderr, "Error: Full binary translation must be enabled for MinGW cross-compilation\n");
+		exit(1);
+	}
+
+	std::vector<riscv::MachineTranslationOptions> cc;
+	if (cli_args.mingw) {
+		cc.push_back(riscv::MachineTranslationCrossOptions{});
+	}
+	if (!cli_args.output_file.empty()) {
+		cc.push_back(riscv::MachineTranslationEmbeddableCodeOptions{cli_args.output_file});
+	}
+
 	// Create a RISC-V machine with the binary as input program
 	riscv::Machine<W> machine { binary, {
 		.memory_max = MAX_MEMORY,
@@ -147,12 +219,22 @@ static void run_program(
 		.translation_prefix = "translations/rvbintr-",
 		.translation_suffix = ".dll",
 #else
-		.cross_compile = cli_args.mingw ?
-			std::vector<riscv::MachineTranslationCrossOptions>{riscv::MachineTranslationCrossOptions{}}
-		  : std::vector<riscv::MachineTranslationCrossOptions>{},
+		.cross_compile = cc,
 #endif
 #endif
 	}};
+
+	// A helper system call to ask for symbols that is possibly only known at runtime
+	// Used by testing executables
+	riscv::address_type<W> symbol_function = 0;
+	machine.set_userdata(&symbol_function);
+	machine.install_syscall_handler(500,
+		[] (auto& machine) {
+			auto [addr] = machine.template sysargs<riscv::address_type<W>>();
+			auto& symfunc = *machine.template get_userdata<decltype(symbol_function)>();
+			symfunc = addr;
+			printf("Introduced to symbol function: 0x%" PRIX64 "\n", uint64_t(addr));
+		});
 
 	if constexpr (full_linux_guest)
 	{
@@ -165,9 +247,9 @@ static void run_program(
 		machine.fds().permit_filesystem = !cli_args.sandbox;
 		machine.fds().permit_sockets    = !cli_args.sandbox;
 		// Rewrite certain links to masquerade and simplify some interactions (eg. /proc/self/exe)
-		machine.fds().filter_readlink = [=] (void* user, std::string& path) {
+		machine.fds().filter_readlink = [&] (void* user, std::string& path) {
 			if (path == "/proc/self/exe") {
-				path = "/program";
+				path = machine.fds().cwd + "/program";
 				return true;
 			}
 			fprintf(stderr, "Guest wanted to readlink: %s (denied)\n", path.c_str());
@@ -215,6 +297,8 @@ static void run_program(
 						fprintf(stderr, "Guest wanted to open: %s (denied)\n", path.c_str());
 					}
 					return false;
+				} else if (cli_args.verbose) {
+					fprintf(stderr, "Guest wanted to open: %s (allowed)\n", path.c_str());
 				}
 				// Construct new path
 				path = real_libdir + path.substr(sandbox_libdir.size());
@@ -315,8 +399,13 @@ static void run_program(
 			machine.set_max_instructions(~0ULL);
 			machine.cpu.simulate_precise();
 		} else {
+#ifdef RISCV_TIMED_VMCALLS
+			// Simulation with experimental timeout
+			machine.execute_with_timeout(30.0f, ~0ULL, 0U, machine.cpu.pc());
+#else
 			// Normal RISC-V simulation
 			machine.simulate(cli_args.fuel);
+#endif
 		}
 	} catch (riscv::MachineException& me) {
 		printf("%s\n", machine.cpu.current_instruction_to_string().c_str());
@@ -366,6 +455,24 @@ static void run_program(
 			machine.memory.pages_active(),
 			machine.memory.pages_active() * riscv::Page::size() / uint64_t(1024),
 			machine.memory.memory_usage_total() / uint64_t(1024));
+	}
+
+	if (!cli_args.call_function.empty())
+	{
+		auto addr = machine.address_of(cli_args.call_function);
+		if (addr == 0 && symbol_function != 0) {
+			addr = machine.vmcall(symbol_function, cli_args.call_function);
+		}
+		if (addr != 0) {
+			printf("Calling function %s @ 0x%lX\n", cli_args.call_function.c_str(), long(addr));
+#ifdef RISCV_TIMED_VMCALLS
+			machine.timed_vmcall(addr, 30.0f);
+#else
+			machine.vmcall(addr);
+#endif
+		} else {
+			printf("Error: Function %s not found, not able to call\n", cli_args.call_function.c_str());
+		}
 	}
 }
 

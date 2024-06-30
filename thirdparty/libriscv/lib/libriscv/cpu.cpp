@@ -11,7 +11,7 @@ namespace riscv
 	template <int W>
 	static std::shared_ptr<DecodedExecuteSegment<W>> empty_shared = std::make_shared<DecodedExecuteSegment<W>>(0, 0, 0, 0);
 	template <int W>
-	std::shared_ptr<DecodedExecuteSegment<W>>& CPU<W>::empty_execute_segment() {
+	std::shared_ptr<DecodedExecuteSegment<W>>& CPU<W>::empty_execute_segment() noexcept {
 		return empty_shared<W>;
 	}
 
@@ -63,7 +63,7 @@ namespace riscv
 			trigger_exception(EXECUTION_SPACE_PROTECTION_FAULT, begin);
 
 		this->m_exec = &machine().memory.create_execute_segment(
-			{}, vdata, begin, vlength);
+			machine().options(), vdata, begin, vlength);
 		return *this->m_exec;
 	} // CPU::init_execute_area
 

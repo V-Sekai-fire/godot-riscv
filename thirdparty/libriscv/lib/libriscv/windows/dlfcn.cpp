@@ -904,4 +904,4 @@ BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 }
 #endif
 
-// Path: lib/libriscv/win32/dlfcn.h
+// Path: lib/libriscv/windows/dlfcn.h

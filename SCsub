@@ -21,11 +21,11 @@ env_riscv.Append(CPPDEFINES=[
     "RISCV_FLAT_RW_ARENA",
     # "RISCV_ENCOMPASSING_ARENA",
     "RISCV_THREADED",
-    "RISCV_TAILCALL_DISPATCH",
+    # "RISCV_TAILCALL_DISPATCH",
     # "RISCV_LIBTCC",
 ])
 
-env_riscv.Append(CXXFLAGS=["-std=c++20"])
+env_riscv.Append(CXXFLAGS=["-std=c++20", "-Wno-implicit-fallthrough"])
 
 thirdparty_obj = []
 

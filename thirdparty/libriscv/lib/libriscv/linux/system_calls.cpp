@@ -27,7 +27,7 @@ static constexpr bool verbose_syscalls = false;
 #ifndef EBADFD
 #define EBADFD EBADF  // OpenBSD, FreeBSD
 #endif
-#define SA_ONSTACK	0x08000000
+#define LIBRISCV_SA_ONSTACK	0x08000000
 
 namespace riscv {
 
@@ -140,14 +140,14 @@ static void syscall_sigaction(Machine<W>& machine)
 	} sa {};
 	if (old_action != 0x0) {
 		sa.sa_handler = sigact.handler & ~address_type<W>(0xF);
-		sa.sa_flags   = (sigact.altstack ? SA_ONSTACK : 0x0);
+		sa.sa_flags   = (sigact.altstack ? LIBRISCV_SA_ONSTACK : 0x0);
 		sa.sa_mask    = sigact.mask;
 		machine.copy_to_guest(old_action, &sa, sizeof(sa));
 	}
 	if (action != 0x0) {
 		machine.copy_from_guest(&sa, action, sizeof(sa));
 		sigact.handler  = sa.sa_handler;
-		sigact.altstack = (sa.sa_flags & SA_ONSTACK) != 0;
+		sigact.altstack = (sa.sa_flags & LIBRISCV_SA_ONSTACK) != 0;
 		sigact.mask     = sa.sa_mask;
 		SYSPRINT("<<< sigaction %d handler: 0x%lX altstack: %d\n",
 			sig, (long)sigact.handler, sigact.altstack);
@@ -367,6 +367,8 @@ static void syscall_openat(Machine<W>& machine)
 			// filter_open() can modify the path
 			if (!machine.fds().filter_open(machine.template get_userdata<void>(), path)) {
 				machine.set_result(-EPERM);
+				SYSPRINT("SYSCALL openat(path: %s) => %d\n",
+					path.c_str(), machine.template return_value<int>());
 				return;
 			}
 		}
@@ -528,40 +530,38 @@ void syscall_readlinkat(Machine<W>& machine)
 
 	const std::string original_path = machine.memory.memstring(g_path);
 
-	SYSPRINT("SYSCALL readlinkat, fd: %d path: %s buffer: 0x%lX size: %zu\n",
-		vfd, original_path.c_str(), (long)g_buf, (size_t)bufsize);
-
-	char buffer[512];
+	char buffer[4096];
 	if (bufsize > sizeof(buffer)) {
 		machine.set_result(-ENOMEM);
-		return;
-	}
-
-	if (machine.has_file_descriptors()) {
-
+	} else if (machine.has_file_descriptors()) {
 		if (machine.fds().filter_readlink != nullptr) {
 			std::string path = original_path;
 			if (!machine.fds().filter_readlink(machine.template get_userdata<void>(), path)) {
 				machine.set_result(-EPERM);
-				return;
+			} else {
+				// Readlink always rewrites the answer
+				machine.copy_to_guest(g_buf, path.c_str(), path.size());
+				machine.set_result(path.size());
 			}
-			// Readlink always rewrites the answer
-			machine.copy_to_guest(g_buf, path.c_str(), path.size());
-			machine.set_result(path.size());
-			return;
+			SYSPRINT("SYSCALL readlinkat, fd: %d path: %s (filter => %s) buffer: 0x%lX size: %zu >= %ld\n",
+					 vfd, original_path.c_str(), path.c_str(), (long)g_buf, (size_t)bufsize, (long)machine.return_value());
 		}
-		const int real_fd = machine.fds().translate(vfd);
+		else
+		{
+			const int real_fd = machine.fds().translate(vfd);
 
-		const int res = readlinkat(real_fd, original_path.c_str(), buffer, bufsize);
-		if (res > 0) {
-			// TODO: Only necessary if g_buf is not sequential.
-			machine.copy_to_guest(g_buf, buffer, res);
+			const int res = readlinkat(real_fd, original_path.c_str(), buffer, bufsize);
+			if (res > 0) {
+				// TODO: Only necessary if g_buf is not sequential.
+				machine.copy_to_guest(g_buf, buffer, res);
+			}
+			machine.set_result_or_error(res);
 		}
-
-		machine.set_result_or_error(res);
-		return;
+	} else {
+		machine.set_result(-ENOSYS);
 	}
-	machine.set_result(-ENOSYS);
+	SYSPRINT("SYSCALL readlinkat, fd: %d path: %s buffer: 0x%lX size: %zu => %ld\n",
+			 vfd, original_path.c_str(), (long)g_buf, (size_t)bufsize, (long)machine.return_value());
 }
 
 // The RISC-V stat structure is different from x86
@@ -629,6 +629,23 @@ inline void copy_stat_buffer(struct stat& st, struct riscv_stat& rst)
 	rst.rv_ctime_nsec = 0; // or another appropriate value
 	#endif
 	#endif
+}
+
+template <int W>
+static void syscall_getcwd(Machine<W>& machine)
+{
+	const auto g_buf = machine.sysarg(0);
+	[[maybe_unused]] const auto size = machine.sysarg(1);
+
+	auto& cwd = machine.fds().cwd;
+	if (!cwd.empty()) {
+		machine.copy_to_guest(g_buf, cwd.c_str(), cwd.size()+1);
+		machine.set_result(cwd.size()+1);
+	} else {
+		machine.set_result(-1);
+	}
+	SYSPRINT("SYSCALL getcwd, buffer: 0x%lX size: %ld => %ld\n",
+		(long)g_buf, (long)size, (long)machine.return_value());
 }
 
 template <int W>
@@ -959,6 +976,8 @@ void Machine<W>::setup_linux_syscalls(bool filesystem, bool sockets)
 {
 	install_syscall_handler(SYSCALL_EBREAK, syscall_ebreak<W>);
 
+	// getcwd
+	install_syscall_handler(17, syscall_getcwd<W>);
 #ifdef __linux__
 	// eventfd2
 	install_syscall_handler(19, syscall_eventfd2<W>);

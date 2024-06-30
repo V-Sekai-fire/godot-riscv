@@ -93,4 +93,4 @@ DLFCN_EXPORT int dladdr(const void *addr, Dl_info *info);
 
 #endif /* DLFCN_H */
 
-// Path: lib/libriscv/win32/dlfcn.c
+// Path: lib/libriscv/windows/dlfcn.c

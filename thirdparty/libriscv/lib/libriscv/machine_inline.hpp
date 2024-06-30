@@ -182,12 +182,12 @@ inline auto Machine<W>::sysargs() const {
 
 template <int W>
 template <typename... Args>
-inline void Machine<W>::set_result(Args... args) {
+inline void Machine<W>::set_result(Args... args) noexcept {
 	size_t i = 0;
 	size_t f = 0;
 	([&] {
 		if constexpr (std::is_integral_v<Args>) {
-			cpu.registers().at(REG_ARG0 + i++) = args;
+			cpu.registers().get(REG_ARG0 + i++) = args;
 		}
 		else if constexpr (std::is_same_v<Args, float>)
 			cpu.registers().getfl(REG_FA0 + f++).set_float(args);
@@ -244,7 +244,7 @@ address_type<W> Machine<W>::stack_push(const T& type)
 }
 
 template <int W> inline
-void Machine<W>::realign_stack()
+void Machine<W>::realign_stack() noexcept
 {
 	// the RISC-V calling convention mandates a 16-byte alignment
 	cpu.reg(REG_SP) &= ~address_t{0xF};
@@ -253,29 +253,45 @@ void Machine<W>::realign_stack()
 template <int W> inline
 const MultiThreading<W>& Machine<W>::threads() const
 {
-	if (UNLIKELY(m_mt == nullptr))
-		throw MachineException(FEATURE_DISABLED, "Threads are not initialized");
-	return *m_mt;
+	if (LIKELY(m_mt != nullptr))
+		return *m_mt;
+#if __cpp_exceptions
+	throw MachineException(FEATURE_DISABLED, "Threads are not initialized");
+#else
+	std::abort();
+#endif
 }
 template <int W> inline
 MultiThreading<W>& Machine<W>::threads()
 {
-	if (UNLIKELY(m_mt == nullptr))
-		throw MachineException(FEATURE_DISABLED, "Threads are not initialized");
-	return *m_mt;
+	if (LIKELY(m_mt != nullptr))
+		return *m_mt;
+#if __cpp_exceptions
+	throw MachineException(FEATURE_DISABLED, "Threads are not initialized");
+#else
+	std::abort();
+#endif
 }
 
 template <int W> inline
 const FileDescriptors& Machine<W>::fds() const
 {
 	if (m_fds != nullptr) return *m_fds;
+#if __cpp_exceptions
 	throw MachineException(ILLEGAL_OPERATION, "No access to files or sockets", 0);
+#else
+	std::abort();
+#endif
 }
 template <int W> inline
 FileDescriptors& Machine<W>::fds()
 {
 	if (m_fds != nullptr) return *m_fds;
+#if __cpp_exceptions
 	throw MachineException(ILLEGAL_OPERATION, "No access to files or sockets", 0);
+#else
+	std::abort();
+#endif
 }
 
 template <int W> inline

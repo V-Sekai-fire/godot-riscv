@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/fwsGonzo/libriscv.git
 	branch = master
-	commit = acdf74dbc9461338e98bf59f16ef516e3363639a
-	parent = c7cd46b54368a3255092a270bc88e5c31a44bcdc
+	commit = 22958e98e862b5a5fcb43e7e56ff6fcd38f7dd37
+	parent = bc8119e54731aa31c9515dbba1d06895150e6df0
 	method = merge
 	cmdver = 0.4.6

@@ -11,7 +11,6 @@ __cxa_demangle(const char *name, char *buf, size_t *n, int *status);
 
 namespace riscv
 {
-
 #ifdef __linux__
 	static constexpr uint64_t UNBOUNDED_ARENA_SIZE = (1ULL << encompassing_Nbit_arena) + Page::size();
 #endif
@@ -48,7 +47,7 @@ namespace riscv
 					// and only allocate real memory according to pages_max. Then handle
 					// page faults for the rest of the address space using userfaultfd.
 					this->m_arena.data = (PageData *)mmap(NULL, UNBOUNDED_ARENA_SIZE, PROT_READ | PROT_WRITE,
-						MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE, -1, 0);
+						LIBRISCV_MAP_ANONYMOUS | LIBRISCV_MAP_PRIVATE | LIBRISCV_MAP_NORESERVE, -1, 0);
 					if (UNLIKELY(this->m_arena.data == MAP_FAILED)) {
 						// We probably reached a limit on the number of mappings
 						this->m_arena.data = nullptr;
@@ -56,7 +55,7 @@ namespace riscv
 					}
 					this->m_arena.pages = (1ULL << encompassing_Nbit_arena) / Page::size();
 					/*this->m_arena.data = (PageData *)mmap(m_arena.data, (pages_max + 1) * Page::size(), PROT_READ | PROT_WRITE,
-						MAP_FIXED | MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE, -1, 0);
+						MAP_FIXED | LIBRISCV_MAP_ANONYMOUS | LIBRISCV_MAP_PRIVATE | LIBRISCV_MAP_NORESERVE, -1, 0);
 					if (UNLIKELY(this->m_arena.data == MAP_FAILED)) {
 						throw MachineException(OUT_OF_MEMORY, "Out of memory", this->m_arena.pages * Page::size());
 					}*/
@@ -64,7 +63,7 @@ namespace riscv
 					// Over-allocate by 1 page in order to avoid bounds-checking with size
 					const size_t len = (pages_max + 1) * Page::size();
 					this->m_arena.data = (PageData *)mmap(NULL, len, PROT_READ | PROT_WRITE,
-						MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE, -1, 0);
+						LIBRISCV_MAP_ANONYMOUS | LIBRISCV_MAP_PRIVATE | LIBRISCV_MAP_NORESERVE, -1, 0);
 					this->m_arena.pages = pages_max;
 					// mmap() returns MAP_FAILED (-1) when mapping fails
 					if (UNLIKELY(this->m_arena.data == MAP_FAILED)) {
@@ -548,7 +547,7 @@ namespace riscv
 		// Add the correct offset to address for dynamically loaded programs
 		address = this->elf_base_address(address);
 
-		const auto* symtab = elf_sym_index(sym_hdr, 0);
+		const auto* symtab = elf_offset<typename Elf::Sym>(sym_hdr->sh_offset);
 		const size_t symtab_ents = sym_hdr->sh_size / sizeof(typename Elf::Sym);
 		const char* strtab = elf_offset<char>(str_hdr->sh_offset);
 

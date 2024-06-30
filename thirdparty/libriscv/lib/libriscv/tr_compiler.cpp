@@ -2,7 +2,7 @@
 
 #include <cstring>
 #if defined(__MINGW32__) || defined(__MINGW64__) || defined(_MSC_VER)
-#include "win32/dlfcn.h"
+#include "windows/dlfcn.h"
 #else
 #include <dlfcn.h>
 #endif

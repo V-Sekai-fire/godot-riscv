@@ -1,6 +1,6 @@
 /// Linux memory mapping system call emulation
 /// Works on all platforms
-#define MAP_ANONYMOUS        0x20
+#define LIBRISCV_MAP_ANONYMOUS        0x20
 
 template <int W>
 static void add_mman_syscalls()
@@ -119,7 +119,7 @@ static void add_mman_syscalls()
 		}
 
 		// anon pages need to be zeroed
-		if (flags & MAP_ANONYMOUS) {
+		if (flags & LIBRISCV_MAP_ANONYMOUS) {
 			machine.memory.memdiscard(result, length, true);
 		}
 
