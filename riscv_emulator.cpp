@@ -33,6 +33,12 @@
 
 using namespace riscv;
 
+RiscvEmulator *RiscvEmulator::singleton = nullptr;
+
+RiscvEmulator *RiscvEmulator::get_singleton() {
+	return singleton;
+}
+
 String RiscvEmulator::to_string() {
 	return "[ GDExtension::RiscvEmulator <--> Instance ID:" + uitos(get_instance_id()) + " ]";
 }

@@ -46,10 +46,13 @@ class RiscvEmulator : public Resource {
 
 protected:
 	static void _bind_methods();
+	static RiscvEmulator *singleton;
 
 	virtual String to_string() override;
 
 public:
+	static RiscvEmulator *get_singleton();
+
 	static constexpr uint64_t MAX_INSTRUCTIONS = 16'000'000'000ULL;
 
 	RiscvEmulator();
@@ -67,11 +70,12 @@ public:
 	int64_t call(String function);
 	gaddr_t _address_of(std::string_view name) const;
 
-    PackedByteArray get_buffer() const { return buffer; }
-    void set_buffer(const PackedByteArray& p_new_buffer) { buffer = p_new_buffer; }
+	PackedByteArray get_buffer() const { return buffer; }
+	void set_buffer(const PackedByteArray &p_new_buffer) { buffer = p_new_buffer; }
 
-    PackedStringArray get_arguments() const { return arguments; }
-    void set_arguments(const PackedStringArray& p_new_arguments) { arguments = p_new_arguments; }
+	PackedStringArray get_arguments() const { return arguments; }
+	void set_arguments(const PackedStringArray &p_new_arguments) { arguments = p_new_arguments; }
+
 private:
 	void _handle_exception(gaddr_t);
 	void _handle_timeout(gaddr_t);
@@ -83,8 +87,8 @@ private:
 	unsigned m_budget_overruns = 0;
 	String m_name;
 
-    PackedByteArray buffer;
-    PackedStringArray arguments;
+	PackedByteArray buffer;
+	PackedStringArray arguments;
 };
 
 #endif // RISCV_EMULATOR_H
