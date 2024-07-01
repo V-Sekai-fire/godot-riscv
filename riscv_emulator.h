@@ -58,14 +58,12 @@ public:
 	auto &machine() { return *m_machine; }
 	const auto &machine() const { return *m_machine; }
 
-	const String &name();
-
 	// Functions.
-	void load(const PackedByteArray buffer, const PackedStringArray arguments);
+	void load(const PackedByteArray p_buffer, const PackedStringArray p_arguments);
 	void exec();
 	void fork_exec();
-	int64_t call(String function);
-	gaddr_t _address_of(std::string_view name) const;
+	int64_t call(String p_function);
+	gaddr_t _address_of(std::string_view p_name) const;
 
 	PackedByteArray get_buffer() const { return buffer; }
 	void set_buffer(const PackedByteArray &p_new_buffer) { buffer = p_new_buffer; }
@@ -82,7 +80,6 @@ private:
 
 	bool m_last_newline = false;
 	unsigned m_budget_overruns = 0;
-	String m_name;
 
 	PackedByteArray buffer;
 	PackedStringArray arguments;

@@ -54,18 +54,13 @@ RiscvEmulator::RiscvEmulator() {
 	// In order to reduce checks we guarantee that this
 	// class is well-formed at all times.
 	this->m_machine = new machine_t{};
-	this->m_name = "(name)";
 }
 
 RiscvEmulator::~RiscvEmulator() {
 	delete this->m_machine;
 }
 
-const String &RiscvEmulator::name() {
-	return this->m_name;
-}
-
-void RiscvEmulator::load(const PackedByteArray buffer, const PackedStringArray arguments) {
+void RiscvEmulator::load(const PackedByteArray p_buffer, const PackedStringArray p_arguments) {
 	print_line("Loading file from buffer");
 
 	m_binary = std::vector<uint8_t>{ buffer.ptr(), buffer.ptr() + buffer.size() };
@@ -89,8 +84,8 @@ void RiscvEmulator::exec() {
 void RiscvEmulator::fork_exec() {
 }
 
-int64_t RiscvEmulator::call(String function) {
-	const auto ascii = function.ascii();
+int64_t RiscvEmulator::call(String p_function) {
+	const auto ascii = p_function.ascii();
 	const std::string_view sview{ ascii.get_data(), (size_t)ascii.length() };
 	gaddr_t address = 0x0;
 
@@ -104,17 +99,17 @@ int64_t RiscvEmulator::call(String function) {
 	return -1;
 }
 
-void RiscvEmulator::_handle_exception(gaddr_t address) {
-	auto callsite = machine().memory.lookup(address);
+void RiscvEmulator::_handle_exception(gaddr_t p_address) {
+	auto callsite = machine().memory.lookup(p_address);
 	print_line(
-			"[", name(), "] Exception when calling:\n  ", callsite.name.c_str(), " (0x",
+			"[", get_name(), "] Exception when calling:\n  ", callsite.name.c_str(), " (0x",
 			String("%x").format(callsite.address), ")\n", "Backtrace:\n");
 	//this->print_backtrace(address);
 
 	try {
 		throw; // re-throw
 	} catch (const riscv::MachineTimeoutException &e) {
-		_handle_timeout(address);
+		_handle_timeout(p_address);
 		return; // NOTE: might wanna stay
 	} catch (const riscv::MachineException &e) {
 		const String instr(machine().cpu.current_instruction_to_string().c_str());
@@ -136,14 +131,14 @@ void RiscvEmulator::_handle_exception(gaddr_t address) {
 			"\n");
 }
 
-void RiscvEmulator::_handle_timeout(gaddr_t address) {
+void RiscvEmulator::_handle_timeout(gaddr_t p_address) {
 	this->m_budget_overruns++;
-	auto callsite = machine().memory.lookup(address);
+	auto callsite = machine().memory.lookup(p_address);
 	print_line(
 			"RiscvEmulator: Timeout for '", callsite.name.c_str(),
 			"' (Timeouts: ", m_budget_overruns, "\n");
 }
 
-gaddr_t RiscvEmulator::_address_of(std::string_view name) const {
-	return machine().address_of(name);
+gaddr_t RiscvEmulator::_address_of(std::string_view p_name) const {
+	return machine().address_of(p_name);
 }
