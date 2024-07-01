@@ -71,7 +71,6 @@ thirdparty_sources = [
     # "thirdparty/libriscv/lib/libriscv/tr_emit_rvc.cpp",
     # "thirdparty/libriscv/lib/libriscv/tr_tcc.cpp",
     # "thirdparty/libriscv/lib/libriscv/tr_translate.cpp",
-    "thirdparty/libriscv/lib/libriscv/linux/system_calls.cpp",
 ]
 
 if env["platform"] == "windows":    
@@ -86,12 +85,18 @@ elif env["platform"] == "linux":
         "thirdparty/libriscv/lib/libriscv/linux/syscalls_mman.cpp",
         "thirdparty/libriscv/lib/libriscv/linux/syscalls_poll.cpp",
         "thirdparty/libriscv/lib/libriscv/linux/syscalls_select.cpp",
+        "thirdparty/libriscv/lib/libriscv/linux/system_calls.cpp",
+    ]
+    
+if env["platform"] != "windows":  
+    thirdparty_sources += [
+        "thirdparty/libriscv/lib/libriscv/linux/system_calls.cpp",
     ]
 
-if env["platform"] == "windows" and not env["use_mingw"]:
-    env_riscv.Append(CXXFLAGS=["/std:c++20"])
-else:
+if env["platform"] != "windows" or env["use_mingw"]:
     env_riscv.Append(CXXFLAGS=["-std=c++20"])
+else:
+    env_riscv.Append(CXXFLAGS=["/std:c++20"])
     
 
 env_riscv.add_source_files(thirdparty_obj, thirdparty_sources)

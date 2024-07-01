@@ -111,7 +111,7 @@ static void syscall_sigaction(Machine<W> &machine) {
 	if (action != 0x0) {
 		machine.copy_from_guest(&sa, action, sizeof(sa));
 		sigact.handler = sa.sa_handler;
-		sigact.altstack = (sa.sa_flags & LIBRISCV_LIBRISCV_SA_ONSTACK) != 0;
+		sigact.altstack = (sa.sa_flags & LIBRISCV_SA_ONSTACK) != 0;
 		sigact.mask = sa.sa_mask;
 		SYSPRINT("<<< sigaction %d handler: 0x%lX altstack: %d\n",
 			sig, (long)sigact.handler, sigact.altstack);
