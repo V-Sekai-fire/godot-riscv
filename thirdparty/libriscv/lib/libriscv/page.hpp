@@ -19,7 +19,7 @@ struct PageAttributes
 	uint8_t user_defined = 0; /* Use this for yourself */
 
 	int to_prot() const noexcept {
-		return this->read | (this->write << 1) | (this->exec << 2);
+		return static_cast<int>(this->read) | (static_cast<int>(this->write) << 1) | (static_cast<int>(this->exec) << 2);
 	}
 
 	constexpr bool is_cacheable() const noexcept {
