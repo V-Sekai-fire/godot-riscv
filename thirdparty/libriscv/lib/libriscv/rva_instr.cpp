@@ -49,13 +49,7 @@ namespace riscv
 	{
 		cpu.template amo<int32_t>(instr,
 		[] (auto& cpu, auto& value, auto rs2) {
-#ifdef __cpp_lib_atomic_ref
 			return std::atomic_ref(value).fetch_add(cpu.reg(rs2));
-#else
-			auto old_value = value;
-			value += cpu.reg(rs2);
-			return old_value;
-#endif
 		});
 	},
 	[] (char* buffer, size_t len, auto&, rv32i_instruction instr) RVPRINTR_ATTR {
@@ -72,13 +66,7 @@ namespace riscv
 	{
 		cpu.template amo<int32_t>(instr,
 		[] (auto& cpu, auto& value, auto rs2) {
-#ifdef __cpp_lib_atomic_ref
 			return std::atomic_ref(value).fetch_xor(cpu.reg(rs2));
-#else
-			auto old_value = value;
-			value ^= cpu.reg(rs2);
-			return old_value;
-#endif
 		});
 	}, DECODED_ATOMIC(AMOADD_W).printer);
 
@@ -87,13 +75,7 @@ namespace riscv
 	{
 		cpu.template amo<int32_t>(instr,
 		[] (auto& cpu, auto& value, auto rs2) {
-#ifdef __cpp_lib_atomic_ref
 			return std::atomic_ref(value).fetch_or(cpu.reg(rs2));
-#else
-			auto old_value = value;
-			value |= cpu.reg(rs2);
-			return old_value;
-#endif
 		});
 	}, DECODED_ATOMIC(AMOADD_W).printer);
 
@@ -102,13 +84,7 @@ namespace riscv
 	{
 		cpu.template amo<int32_t>(instr,
 		[] (auto& cpu, auto& value, auto rs2) {
-#ifdef __cpp_lib_atomic_ref
 			return std::atomic_ref(value).fetch_and(cpu.reg(rs2));
-#else
-			auto old_value = value;
-			value &= cpu.reg(rs2);
-			return old_value;
-#endif
 		});
 	}, DECODED_ATOMIC(AMOADD_W).printer);
 
@@ -161,13 +137,7 @@ namespace riscv
 	{
 		cpu.template amo<int64_t>(instr,
 		[] (auto& cpu, auto& value, auto rs2) {
-#ifdef __cpp_lib_atomic_ref
 			return std::atomic_ref(value).fetch_add(cpu.reg(rs2));
-#else
-			auto old_value = value;
-			value += cpu.reg(rs2);
-			return old_value;
-#endif
 		});
 	}, DECODED_ATOMIC(AMOADD_W).printer);
 
@@ -176,13 +146,7 @@ namespace riscv
 	{
 		cpu.template amo<int64_t>(instr,
 		[] (auto& cpu, auto& value, auto rs2) {
-#ifdef __cpp_lib_atomic_ref
 			return std::atomic_ref(value).fetch_xor(cpu.reg(rs2));
-#else
-			auto old_value = value;
-			value ^= cpu.reg(rs2);
-			return old_value;
-#endif
 		});
 	}, DECODED_ATOMIC(AMOADD_W).printer);
 
@@ -191,13 +155,7 @@ namespace riscv
 	{
 		cpu.template amo<int64_t>(instr,
 		[] (auto& cpu, auto& value, auto rs2) {
-#ifdef __cpp_lib_atomic_ref
 			return std::atomic_ref(value).fetch_or(cpu.reg(rs2));
-#else
-			auto old_value = value;
-			value |= cpu.reg(rs2);
-			return old_value;
-#endif
 		});
 	}, DECODED_ATOMIC(AMOADD_W).printer);
 
@@ -206,13 +164,7 @@ namespace riscv
 	{
 		cpu.template amo<int64_t>(instr,
 		[] (auto& cpu, auto& value, auto rs2) {
-#ifdef __cpp_lib_atomic_ref
 			return std::atomic_ref(value).fetch_and(cpu.reg(rs2));
-#else
-			auto old_value = value;
-			value &= cpu.reg(rs2);
-			return old_value;
-#endif
 		});
 	}, DECODED_ATOMIC(AMOADD_W).printer);
 
@@ -265,13 +217,7 @@ namespace riscv
 	{
 		cpu.template amo<int32_t>(instr,
 		[] (auto& cpu, auto& value, auto rs2) {
-#ifdef __cpp_lib_atomic_ref
 			return std::atomic_ref(value).exchange(cpu.reg(rs2));
-#else
-			auto old_value = value;
-			value = cpu.reg(rs2);
-			return old_value;
-#endif
 		});
 	},
 	[] (char* buffer, size_t len, auto&, rv32i_instruction instr) RVPRINTR_ATTR {
@@ -287,13 +233,7 @@ namespace riscv
 	{
 		cpu.template amo<int64_t>(instr,
 		[] (auto& cpu, auto& value, auto rs2) {
-#ifdef __cpp_lib_atomic_ref
 			return std::atomic_ref(value).exchange(cpu.reg(rs2));
-#else
-			auto old_value = value;
-			value = cpu.reg(rs2);
-			return old_value;
-#endif
 		});
 	}, DECODED_ATOMIC(AMOSWAP_W).printer);
 
