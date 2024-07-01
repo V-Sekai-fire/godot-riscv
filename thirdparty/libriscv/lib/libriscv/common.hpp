@@ -354,7 +354,7 @@ namespace riscv
 #define RISCV_HOT_PATH()  /* */
 #endif
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(__MINGW32__)
 #define RISCV_ALWAYS_INLINE __forceinline
 #define RISCV_NOINLINE      __declspec(noinline)
 #endif
