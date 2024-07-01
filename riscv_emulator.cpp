@@ -41,7 +41,7 @@ void RiscvEmulator::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("load", "buffer", "arguments"), &RiscvEmulator::load);
 	ClassDB::bind_method(D_METHOD("exec"), &RiscvEmulator::exec);
 	ClassDB::bind_method(D_METHOD("fork_exec"), &RiscvEmulator::fork_exec);
-	ClassDB::bind_method(D_METHOD("call", "function"), &RiscvEmulator::call);
+	ClassDB::bind_method(D_METHOD("invoke_function", "function"), &RiscvEmulator::invoke_function);
 
 	ClassDB::bind_method(D_METHOD("get_buffer"), &RiscvEmulator::get_buffer);
 	ClassDB::bind_method(D_METHOD("set_buffer", "new_buffer"), &RiscvEmulator::set_buffer);
@@ -85,7 +85,7 @@ void RiscvEmulator::exec() {
 void RiscvEmulator::fork_exec() {
 }
 
-int64_t RiscvEmulator::call(String p_function) {
+int64_t RiscvEmulator::invoke_function(String p_function) {
 	const auto ascii = p_function.ascii();
 	const std::string_view sview{ ascii.get_data(), (size_t)ascii.length() };
 	gaddr_t address = 0x0;

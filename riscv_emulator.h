@@ -62,7 +62,7 @@ public:
 	void load(const PackedByteArray p_buffer, const PackedStringArray p_arguments);
 	void exec();
 	void fork_exec();
-	int64_t call(String p_function);
+	int64_t invoke_function(String p_function);
 	gaddr_t _address_of(std::string_view p_name) const;
 
 	PackedByteArray get_buffer() const { return buffer; }
