@@ -4,28 +4,28 @@ env_riscv = env.Clone()
 
 env_riscv.Append(CPPPATH=["#modules/riscv", "thirdparty/libriscv/lib"])
 
-env_riscv.Append(CPPDEFINES=[
-    "_DARWIN_C_SOURCE",
-    # "RISCV_DEBUG",
-    "RISCV_EXT_A",
-    "RISCV_EXT_C",
-    "RISCV_EXT_V",
-    "RISCV_32I",
-    "RISCV_64I",
-    # "RISCV_128I",
-    "RISCV_FCSR",
-    # "RISCV_EXPERIMENTAL",
-    "RISCV_MEMORY_TRAPS",
-    "RISCV_MULTIPROCESS",
-    # "RISCV_BINARY_TRANSLATION",
-    "RISCV_FLAT_RW_ARENA",
-    # "RISCV_ENCOMPASSING_ARENA",
-    "RISCV_THREADED",
-    # "RISCV_TAILCALL_DISPATCH",
-    # "RISCV_LIBTCC",
-])
-
-env_riscv.Append(CXXFLAGS=["-std=c++20"])
+env_riscv.Append(
+    CPPDEFINES=[
+        "_DARWIN_C_SOURCE",
+        # "RISCV_DEBUG",
+        "RISCV_EXT_A",
+        "RISCV_EXT_C",
+        "RISCV_EXT_V",
+        "RISCV_32I",
+        "RISCV_64I",
+        # "RISCV_128I",
+        "RISCV_FCSR",
+        # "RISCV_EXPERIMENTAL",
+        "RISCV_MEMORY_TRAPS",
+        "RISCV_MULTIPROCESS",
+        # "RISCV_BINARY_TRANSLATION",
+        "RISCV_FLAT_RW_ARENA",
+        # "RISCV_ENCOMPASSING_ARENA",
+        "RISCV_THREADED",
+        # "RISCV_TAILCALL_DISPATCH",
+        # "RISCV_LIBTCC",
+    ]
+)
 
 thirdparty_obj = []
 
@@ -72,14 +72,27 @@ thirdparty_sources = [
     # "thirdparty/libriscv/lib/libriscv/tr_tcc.cpp",
     # "thirdparty/libriscv/lib/libriscv/tr_translate.cpp",
     "thirdparty/libriscv/lib/libriscv/linux/system_calls.cpp",
-    # "thirdparty/libriscv/lib/libriscv/linux/syscalls_epoll.cpp",
-    # "thirdparty/libriscv/lib/libriscv/linux/syscalls_mman.cpp",
-    #"thirdparty/libriscv/lib/libriscv/linux/syscalls_poll.cpp",
-    # "thirdparty/libriscv/lib/libriscv/linux/syscalls_select.cpp",
-    # "thirdparty/libriscv/lib/libriscv/windows/dlfcn.cpp",
-    # "thirdparty/libriscv/lib/libriscv/windows/system_calls.cpp",
-    # "thirdparty/libriscv/lib/libriscv/windows/tr_msvc.cpp"
 ]
+
+if env["platform"] == "windows":    
+    thirdparty_sources += [
+        "thirdparty/libriscv/lib/libriscv/windows/dlfcn.cpp",
+        "thirdparty/libriscv/lib/libriscv/windows/system_calls.cpp",
+        "thirdparty/libriscv/lib/libriscv/windows/tr_msvc.cpp",
+    ]
+elif env["platform"] == "linux": 
+    thirdparty_sources += [
+        "thirdparty/libriscv/lib/libriscv/linux/syscalls_epoll.cpp",
+        "thirdparty/libriscv/lib/libriscv/linux/syscalls_mman.cpp",
+        "thirdparty/libriscv/lib/libriscv/linux/syscalls_poll.cpp",
+        "thirdparty/libriscv/lib/libriscv/linux/syscalls_select.cpp",
+    ]
+
+if env["platform"] == "windows":
+    env_riscv.Append(CXXFLAGS=["/std:c++20"])
+else:
+    env_riscv.Append(CXXFLAGS=["-std=c++20"])
+    
 
 env_riscv.add_source_files(thirdparty_obj, thirdparty_sources)
 
