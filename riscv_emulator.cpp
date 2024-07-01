@@ -38,9 +38,10 @@ String RiscvEmulator::to_string() {
 }
 
 void RiscvEmulator::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("load"), &RiscvEmulator::load);
+	ClassDB::bind_method(D_METHOD("load", "buffer", "arguments"), &RiscvEmulator::load);
 	ClassDB::bind_method(D_METHOD("exec"), &RiscvEmulator::exec);
 	ClassDB::bind_method(D_METHOD("fork_exec"), &RiscvEmulator::fork_exec);
+	ClassDB::bind_method(D_METHOD("call", "function"), &RiscvEmulator::call);
 
 	ClassDB::bind_method(D_METHOD("get_buffer"), &RiscvEmulator::get_buffer);
 	ClassDB::bind_method(D_METHOD("set_buffer", "new_buffer"), &RiscvEmulator::set_buffer);
