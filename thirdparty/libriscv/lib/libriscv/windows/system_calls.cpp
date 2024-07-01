@@ -104,7 +104,7 @@ static void syscall_sigaction(Machine<W> &machine) {
 	} sa{};
 	if (old_action != 0x0) {
 		sa.sa_handler = sigact.handler & ~address_type<W>(0xF);
-		sa.sa_flags = (sigact.altstack ? LIBRISCV_LIBRISCV_SA_ONSTACK : 0x0);
+		sa.sa_flags = (sigact.altstack ? LIBRISCV_SA_ONSTACK : 0x0);
 		sa.sa_mask = sigact.mask;
 		machine.copy_to_guest(old_action, &sa, sizeof(sa));
 	}
