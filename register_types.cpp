@@ -33,14 +33,11 @@
 #include "core/object/class_db.h"
 #include "riscv_emulator.h"
 
-#include "core/config/engine.h"
-
 void initialize_riscv_module(ModuleInitializationLevel p_level) {
 	if (p_level != MODULE_INITIALIZATION_LEVEL_SCENE) {
 		return;
 	}
 	ClassDB::register_class<RiscvEmulator>();
-	Engine::get_singleton()->add_singleton(Engine::Singleton("RiscvEmulator", RiscvEmulator::get_singleton()));
 }
 
 void uninitialize_riscv_module(ModuleInitializationLevel p_level) {
