@@ -1,9 +1,9 @@
 #include "cpu.hpp"
 
 #include "instr_helpers.hpp"
-#if __has_include(<atomic>)
-#include <atomic>
-#endif
+// #if __has_include(<atomic>)
+// #include <atomic>
+// #endif
 #include <cstdint>
 #include <inttypes.h>
 static const char atomic_type[] { '?', '?', 'W', 'D', 'Q', '?', '?', '?' };
