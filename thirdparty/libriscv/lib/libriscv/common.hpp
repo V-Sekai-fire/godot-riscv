@@ -330,7 +330,7 @@ namespace riscv
 #endif
 } // riscv
 
-#ifdef __GNUG__
+#ifdef __GNUG__ && (!defined(_MSC_VER) || defined(__MINGW32__))
 
 #ifndef LIKELY
 #define LIKELY(x) __builtin_expect((x), 1)
